@@ -1,9 +1,55 @@
 const config = require('../config');
+const Database = require("@replit/database")
 
 module.exports = (client,message) => {
+    //console.log(message.author.id);
+    
+    let msm = message.content.split(' ');
+    //console.log(msm);
+    const db = new Database();
+    db.list("pila_").then(sinonimos => {
+        for(let i=0;i<msm.length;i++){
+            if(sinonimos.find(e=>e.replace("pila_", "")==msm[i])){
+                message.reply('\n.................▄▄▄▄▄\n..............▄▌░░░░▐▄\n............▐░░░░░░░▌\n....... ▄█▓░░░░░░▓█▄\n....▄▀░░▐░░░░░░▌░▒▌\n.▐░░░░▐░░░░░░▌░░░▌\n▐ ░░░░▐░░░░░░▌░░░▐\n▐ ▒░░░ ▐░░░░░░▌░▒▒▐\n▐ ▒░░░░▐░░░░░░▌░▒▐\n..▀▄▒▒▒▒▐░░░░░░▌▄▀\n........ ▀▀▀ ▐░░░░░░▌\n.................▐░░░░░░▌\n.................▐░░░░░░▌\n.................▐░░░░░░▌\n.................▐░░░░░░▌\n................▐▄▀▀▀▀▀▄▌\n...............▐▒▒▒▒▒▒▒▒▌\n...............▐▒▒▒▒▒▒▒▒▌\n................▐▒▒▒▒▒▒▒▌\n..................▀▌▒▀▒▐▀');
+            }
+        }
+    })
+
     if (message.content.startsWith(config.prefix)) {
         let args = message.content.slice(config.prefix.length).split(' ');
         let command = args.shift().toLowerCase();
+
+        if(command=="pila"&&args[0]){
+            const db = new Database();
+            db.set("pila_"+args[0],args[0]).then(()=>{
+                db.list("pila_").then(matches => console.log(matches));
+            })
+        }
+        if(command=='rmpila'&&args[0]){
+            const db = new Database();
+            db.list("pila_").then(matches => {
+                console.log(1,args[0])
+                console.log(matches);
+                const f = matches.find(e=>e=="pila_"+args[0]);
+                console.log(f)
+                if(f){
+                    db.delete(f).then(()=>{
+                        db.list("pila_").then(matches => console.log(matches));
+                    })
+                }
+            });
+        }
+        if(command=='pilalist'){
+            const db = new Database();
+            db.list("pila_").then(matches => {
+                let sins = [];
+                for(let i=0;i<matches.length;i++){
+                    sins.push(matches[i].replace("pila_",""))
+                }
+                //console.log(sins)
+                message.reply("Sinonimos:```javascript\n[\n"+sins.join(',\n')+"\n]```")
+            });
+        }
 
         if(command=="temp"&&args[0]){
             let category = message.guild.channels.cache.find(c => c.name == "Temp Channels" && c.type == "category");
